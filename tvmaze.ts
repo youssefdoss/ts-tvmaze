@@ -73,7 +73,7 @@ function populateShows(shows: ShowInterface[]): void {
          <div class="media">
            <img
               src="${show.image}"
-              alt="Bletchly Circle San Francisco"
+              alt="${show.name}"
               class="w-25 me-3">
            <div class="media-body">
              <h5 class="text-primary">${show.name}</h5>
