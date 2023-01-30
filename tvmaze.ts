@@ -3,6 +3,7 @@ import * as $ from 'jquery';
 
 const $showsList = $("#showsList");
 const $episodesArea = $("#episodesArea");
+const $episodesList = $("#episodesList");
 const $searchForm = $("#searchForm");
 
 const BASE_API_URL = 'https://api.tvmaze.com/';
@@ -12,7 +13,14 @@ interface ShowInterface {
   id: number,
   name: string,
   summary: string,
-  image: string
+  image: string;
+}
+
+interface EpisodeInterface {
+  id: number,
+  name: string,
+  season: string,
+  number: string;
 }
 
 interface ShowFromApiInterface {
@@ -20,8 +28,15 @@ interface ShowFromApiInterface {
     id: number,
     name: string,
     summary: string,
-    image: { medium: string } | null
+    image: { medium: string; } | null
   }
+}
+
+interface EpisodeFromApiInterface {
+  id: number,
+  name: string,
+  season: number,
+  number: number
 }
 
 /** Given a search term, search for tv shows that match that query.
@@ -32,29 +47,29 @@ interface ShowFromApiInterface {
  */
 
 async function getShowsByTerm(term: string): Promise<ShowInterface[]> {
-  // ADD: Remove placeholder & make request to TVMaze search shows API.
   const shows = await axios.get(
-    `${BASE_API_URL}search/shows`, {params: { q: term } });
+    `${BASE_API_URL}search/shows`, { params: { q: term } });
   const formattedShows = shows.data.map((singleShow: ShowFromApiInterface) => {
-    const show = singleShow.show
+    const show = singleShow.show;
     return {
-    id: show.id,
-    name: show.name,
-    summary: show.summary,
-    image: show.image?.medium || DEFAULT_IMAGE_URL
-  }});
+      id: show.id,
+      name: show.name,
+      summary: show.summary,
+      image: show.image?.medium || DEFAULT_IMAGE_URL
+    };
+  });
   return formattedShows;
 }
 
 
 /** Given list of shows, create markup for each and to DOM */
 
-function populateShows(shows: ShowInterface[]) {
+function populateShows(shows: ShowInterface[]): void {
   $showsList.empty();
 
   for (let show of shows) {
     const $show = $(
-        `<div data-show-id="${show.id}" class="Show col-md-12 col-lg-6 mb-4">
+      `<div data-show-id="${show.id}" class="Show col-md-12 col-lg-6 mb-4">
          <div class="media">
            <img
               src="${show.image}"
@@ -71,7 +86,8 @@ function populateShows(shows: ShowInterface[]) {
        </div>
       `);
 
-    $showsList.append($show);  }
+    $showsList.append($show);
+  }
 }
 
 
@@ -80,7 +96,7 @@ function populateShows(shows: ShowInterface[]) {
  */
 
 async function searchForShowAndDisplay() {
-  const term = $("#searchForm-term").val();
+  const term = $("#searchForm-term").val() as string;
   const shows = await getShowsByTerm(term);
 
   $episodesArea.hide();
@@ -97,8 +113,32 @@ $searchForm.on("submit", async function (evt) {
  *      { id, name, season, number }
  */
 
-// async function getEpisodesOfShow(id) { }
+async function getEpisodesOfShow(id: number): Promise<EpisodeInterface[]> {
+  const episodes = await axios.get(`${BASE_API_URL}/shows/${id}/episodes`);
+  const formattedEpisodes = episodes.data.map(
+    (episode: EpisodeFromApiInterface) => ({
+      id: episode.id,
+      name: episode.name,
+      season: episode.season.toString(),
+      number: episode.number.toString()
+    })
+  );
 
-/** Write a clear docstring for this function... */
+  return formattedEpisodes;
+}
 
-// function populateEpisodes(episodes) { }
+/** TODO: Write a clear docstring for this function... */
+
+function populateEpisodes(episodes: EpisodeInterface[]): void {
+  $episodesList.empty();
+
+  for (let episode of episodes) {
+    const $episode = $(`
+      <li>
+        ${episode.name} (season ${episode.season}, number ${episode.number})
+      </li>
+    `);
+
+    $episodesList.append($episode);
+  }
+}
