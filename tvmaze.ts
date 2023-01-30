@@ -95,7 +95,7 @@ function populateShows(shows: ShowInterface[]): void {
  *    Hide episodes area (that only gets shown if they ask for episodes)
  */
 
-async function searchForShowAndDisplay() {
+async function searchForShowAndDisplay(): Promise<void> {
   const term = $("#searchForm-term").val() as string;
   const shows = await getShowsByTerm(term);
 
@@ -114,7 +114,7 @@ $searchForm.on("submit", async function (evt) {
  */
 
 async function getEpisodesOfShow(id: number): Promise<EpisodeInterface[]> {
-  const episodes = await axios.get(`${BASE_API_URL}/shows/${id}/episodes`);
+  const episodes = await axios.get(`${BASE_API_URL}shows/${id}/episodes`);
   const formattedEpisodes = episodes.data.map(
     (episode: EpisodeFromApiInterface) => ({
       id: episode.id,
@@ -127,7 +127,10 @@ async function getEpisodesOfShow(id: number): Promise<EpisodeInterface[]> {
   return formattedEpisodes;
 }
 
-/** TODO: Write a clear docstring for this function... */
+/** Given list of episodes, create markup for each and add to DOM
+ *
+ * episodes: Array of episode objects
+ */
 
 function populateEpisodes(episodes: EpisodeInterface[]): void {
   $episodesList.empty();
@@ -141,4 +144,19 @@ function populateEpisodes(episodes: EpisodeInterface[]): void {
 
     $episodesList.append($episode);
   }
+
+
 }
+
+/** Handle episodes button click: get episodes from API and display.
+ * Show episodes area
+ */
+
+async function getEpisodesAndDisplay(evt: JQuery.ClickEvent): Promise<void> {
+  const id = $(evt.target).closest("[data-show-id]").data("show-id");
+  const episodes = await getEpisodesOfShow(id);
+  populateEpisodes(episodes);
+  $episodesArea.show();
+}
+
+$showsList.on('click', '.Show-getEpisodes', getEpisodesAndDisplay);

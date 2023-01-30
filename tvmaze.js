@@ -12945,7 +12945,7 @@ function getEpisodesOfShow(id) {
         var episodes, formattedEpisodes;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, axios_1.default.get("".concat(BASE_API_URL, "/shows/").concat(id, "/episodes"))];
+                case 0: return [4 /*yield*/, axios_1.default.get("".concat(BASE_API_URL, "shows/").concat(id, "/episodes"))];
                 case 1:
                     episodes = _a.sent();
                     formattedEpisodes = episodes.data.map(function (episode) { return ({
@@ -12959,7 +12959,10 @@ function getEpisodesOfShow(id) {
         });
     });
 }
-/** TODO: Write a clear docstring for this function... */
+/** Given list of episodes, create markup for each and add to DOM
+ *
+ * episodes: Array of episode objects
+ */
 function populateEpisodes(episodes) {
     $episodesList.empty();
     for (var _i = 0, episodes_1 = episodes; _i < episodes_1.length; _i++) {
@@ -12968,6 +12971,27 @@ function populateEpisodes(episodes) {
         $episodesList.append($episode);
     }
 }
+/** Handle episodes button click: get episodes from API and display.
+ * Show episodes area
+ */
+function getEpisodesAndDisplay(evt) {
+    return __awaiter(this, void 0, void 0, function () {
+        var id, episodes;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    id = $(evt.target).closest("[data-show-id]").data("show-id");
+                    return [4 /*yield*/, getEpisodesOfShow(id)];
+                case 1:
+                    episodes = _a.sent();
+                    populateEpisodes(episodes);
+                    $episodesArea.show();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+$showsList.on('click', '.Show-getEpisodes', getEpisodesAndDisplay);
 
 
 /***/ })
